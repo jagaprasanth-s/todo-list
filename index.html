@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Advanced ToDo App</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: Arial, sans-serif;
+            }
+            body {
+                background: linear-gradient(135deg,#667eea,#764ba2);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .container {
+                background: white;
+                width: 400px;
+                max-width: 95%;
+                padding: 20px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0);
+            }
+            h1 {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            .input-group {
+                display: flex;
+                margin-bottom: 15px;
+            }
+            input {
+                flex: 1;
+                padding: 10px;
+                border: 2px solid #ddd;
+                border-radius: 8px 0 0 8px;
+                outline: none;
+            }
+            button {
+                padding: 10px 15px;
+                border: none;
+                background: #667eea;
+                color: white;
+                cursor: pointer;
+            }
+            .add-btn {
+                border-radius: 0 8px 8px 0;
+            }
+            ul {
+                list-style: none;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            li {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+                margin-bottom: 8px;
+                background: #f3f3f3;
+                border-radius: 8px;
+                transition: 0.3s;
+            }
+            li.completed {
+                text-decoration: line-through;
+                background: #d4edda;
+            }
+            .actions button {
+                margin-left: 5px;
+                border-radius: 5px;
+                padding: 5px 8px;
+            }
+            .delete {
+                background:red;
+            }
+            .edit {
+                background:orange;
+            }
+            .filter {
+                margin-top: 10px;
+                display: flex;
+                justify-content: space-between;
+            }
+            .filter button {
+                flex: 1;
+                margin: 3px;
+                border-radius: 5px;
+            }
+            .active-filter {
+                background: black;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>ToDo List</h1>
+            <div class="input-group">
+                <input type="text" id="todoInput" placeholder="Enter Task ...">
+                <button class="add-btn" onclick="addTodo()">Add</button>
+            </div>
+            <ul id="todoList" ></ul>
+            <div class="filter">
+                <button onclick="setFilter('all')">All</button>
+                <button onclick="setFilter('active')">Active</button>
+                <button onclick="setFilter('completed')">Completed</button>
+            </div>
+        </div>
+        <script>
+            let todos = JSON.parse(localStorage.getItem('todos')) || []
+            let filter = 'all'
+            function saveTodos() {
+                localStorage.setItem('todos',JSON.stringify(todos))
+            }
+            function addTodo() {
+                const input = document.getElementById('todoInput')
+                const text = input.value.trim()
+                if (!text) return
+                todos.push({ text , completed: false })
+                input.value = ''
+                saveTodos()
+                renderTodos()
+            }
+            function toggleTodo(index) {
+                todos[index].completed = !todos[index].completed
+                saveTodos()
+                renderTodos()
+            }
+            function deleteTodo(index) {
+                todos.splice(index,1)
+                saveTodos()
+                renderTodos()
+            }
+            function editTodo(index) {
+                const newText = prompt('Edit Task :',todos[index].text)
+                if (newText !== null && newText.trim() !== '') {
+                    todos[index].text = newText.trim()
+                    saveTodos()
+                    renderTodos()
+                }
+            }
+            function renderTodos() {
+                const list = document.getElementById('todoList')
+                list.innerHTML = ''
+                todos.forEach((todo,index) => {
+                    if (filter === 'active' && todo.completed) return
+                    if (filter === 'completed' && !todo.completed) return
+                    const li = document.createElement('li')
+                    li.className = todo.completed ? 'completed' : ''
+                    const span = document.createElement('span')
+                    span.textContent = todo.text
+                    span.onclick = () => toggleTodo(index)
+                    const actions = document.createElement('div')
+                    actions.className = 'actions'
+                    const editBtn = document.createElement('button')
+                    editBtn.textContent = "Edit"
+                    editBtn.onclick = () => editTodo(index)
+                    const delBtn = document.createElement('button')
+                    delBtn.textContent = 'Delete'
+                    delBtn.className = 'delete'
+                    delBtn.onclick = () => deleteTodo(index)
+                    actions.appendChild(editBtn)
+                    actions.appendChild(delBtn)
+                    li.appendChild(span)
+                    li.appendChild(actions)
+                    list.appendChild(li)
+                });
+            }
+            if(todos.length === 0){
+                list.innerHTML = "<p style='text-align:center'>No Tasks Yet</p>"
+            }
+            document.getElementById('todoInput').addEventListener('keypress',function(e) {
+                if (e.key === 'Enter') addTodo()
+            })
+            function setFilter(type) {
+                filter = type
+                document.querySelectorAll('.filter button').forEach(btn => {
+                    btn.classList.remove('active-filter')
+                })
+                event.target.classList.add('active-filter')
+                renderTodos()
+            }
+            renderTodos()
+        </script>
+    </body>
+</html>
