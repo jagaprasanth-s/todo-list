@@ -145,6 +145,10 @@
             }
             function renderTodos() {
                 const list = document.getElementById('todoList')
+                if (todos.length === 0){
+                    list.innerHTML = "<p style='text-align:center'>No Tasks Yet</p>"
+                    return
+                }
                 list.innerHTML = ''
                 todos.forEach((todo,index) => {
                     if (filter === 'active' && todo.completed) return
@@ -170,10 +174,10 @@
                     list.appendChild(li)
                 });
             }
-            if(todos.length === 0){
-                list.innerHTML = "<p style='text-align:center'>No Tasks Yet</p>"
-            }
-            document.getElementById('todoInput').addEventListener('keypress',function(e) {
+            // if(todos.length === 0){
+            //     list.innerHTML = "<p style='text-align:center'>No Tasks Yet</p>"
+            // }
+            document.getElementById('todoInput').addEventListener('keydown',function(e) {
                 if (e.key === 'Enter') addTodo()
             })
             function setFilter(type) {
